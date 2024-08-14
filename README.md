@@ -107,7 +107,7 @@ In Mass, some ECS terminology differs from the norm in order to not get confused
 Typical Unreal Engine game code is expressed as Actor objects that inherit from parent classes to change their data and functionality based on what they ***are***. 
 In an ECS, an entity is only composed of fragments that get manipulated by processors based on which ECS components they ***have***. 
 
-An entity is really just a small unique identifier that points to some fragments. A Processor defines a query that filters only for entities that have specific fragments. For example, a basic "movement" Processor could query for entities that have a transform and velocity component to add the velocity to their current transform position. 
+An entity is really just a small unique identifier that points to some fragments. A Processor defines a query that filters only for entities that have specific fragments. For example, a basic "movement" Processor could query for entities that have a transform and velocity component to add the velocity to their current transform position.
 
 Fragments are stored in memory as tightly packed arrays of other identical fragment arrangements called archetypes. Because of this, the aforementioned movement processor can be incredibly high performance because it does a simple operation on a small amount of data all at once. New functionality can easily be added by creating new fragments and processors.
 
@@ -647,9 +647,11 @@ Context.Defer().DestroyEntities(EntityHandleArray);
 These are all convenient wrappers for the internal template based deferred commands.
 
 ##### 4.7.3.2 Advanced mutation operations
+
 There is a set of `FCommandBufferEntryBase` commands that can be used to defer some more useful entity mutations. The following subsections provide an overview. 
 
 ###### 4.7.3.2.1 `FMassCommandAddFragmentInstanceList`
+
 Defers adding new fragment data to an existing entity. 
 
 In the example below we mutate the `FHitResultFragment` with HitResult data, and a `FSampleColorFragment` fragment with a new color and add (or set if already present) them to an existing entity.
@@ -679,7 +681,9 @@ EntityManager->Defer().PushCommand<FMassCommandBuildEntity>(ReserverdEntity, MyT
 ```
 
 ###### 4.7.3.2.3 `FMassCommandBuildEntityWithSharedFragments` 
+
 Similar to `FMassCommandBuildEntity` but it takes a `FMassArchetypeSharedFragmentValues` struct to set shared fragment values on the entity as well. This requires some extra work to find or create the shared fragment.
+
 ```c++
 FMassArchetypeSharedFragmentValues SharedFragmentValues;
 // This is what traits use to create their shared fragment info as well
@@ -692,6 +696,7 @@ EntityManager->Defer().PushCommand<FMassCommandBuildEntityWithSharedFragments>(E
 
 <!-- FIXMEVORI: For consistency, lets add as a title the name of the command, however in this one I'm not sure which ones we should include -->
 ##### 4.7.3.2.4 `FMassDeferredSetCommand`
+
 Defers the execution of the `TFunction` lambda passed in as a parameter. It is useful for performing Mass-related operations that none of the other commands cover. This is a smart way to handle Actor mutations, as [those usually need to happen on the main thread](https://vkguide.dev/docs/extra-chapter/multithreading/#ways-of-using-multithreading-in-game-engines).
 
 ```c++
@@ -721,7 +726,6 @@ Here they are and what they do in order when commands are flushed:
 | ChangeComposition | Adding and removing tags/fragments.            |
 | Set               | Changing fragment data (also adding fragments) |
 | None              | Default value, always executed last.           |
-
 
 <!-- REVIEWMEFUNK: I think this section is a bit overkill and might mislead people to thinking they need to make a new template to do anything. They could probably figure out how to do this on their own by just reading the source. -->
 <!-- Do you think FMassDeferredSetCommand can cover them all? Isn't it worth to mention how to create new commands? Remember that this doc is to show how to use mass, so before having the command from above it was a bit tricky -->
@@ -1084,6 +1088,7 @@ EntityManager->BatchDestroyEntityChunks(Collection)
 <!-- #### Direct Call -->
 
 <a name="mass-cm-opee"></a>
+
 ## 5.3 Operating Entities
 
 In this Section we are going to explore the most relevant tools Mass offers to operate Entities. This covers all the get and set operations and structures to work with them (fragment, archetype, tags...).
@@ -1099,6 +1104,7 @@ Following next, we expose some of the relevant functions of `FMassEntityView`:
 <!--TODO: List of relevant functions interesting for the user:-->
 <!-- REVIEWMEFUNK slighty better example... -->
 In the following contrived processor example, we check if `NearbyEntity` is an enemy, if it is, we damage it:
+
 ```c++
 FMassEntityView EntityView(Manager, NearbyEntity.Entity);
 
@@ -1115,9 +1121,10 @@ if (EntityView.HasTag<FEnemyTag>())
 }
 ```
 
-
 <a name="mass-pm"></a>
+
 ## 6. Mass Plugins and Modules
+
 This Section overviews the three main Mass plugins and their different modules:
 
 > 6.1 [`MassEntity`](#mass-pm-me)  
@@ -1125,12 +1132,15 @@ This Section overviews the three main Mass plugins and their different modules:
 > 6.3 [`MassAI`](#mass-pm-ai)  
 
 <a name="mass-pm-me"></a>
-### 6.1 [`MassEntity`](https://docs.unrealengine.com/5.0/en-US/overview-of-mass-entity-in-unreal-engine/)
-`MassEntity` is the main plugin that manages everything regarding Entity creation and storage.
 
+### 6.1 [`MassEntity`](https://docs.unrealengine.com/5.0/en-US/overview-of-mass-entity-in-unreal-engine/)
+
+`MassEntity`插件在5.5废弃，代码移动到引擎中（`Engine/Source/Runtime/MassEntity`）。MassEntity 管理Entity的创建和存储。
 
 <a name="mass-pm-gp"></a>
-### 6.2 `MassGameplay `
+
+### 6.2 `MassGameplay`
+
 The `MassGameplay` plugin compiles a number of useful Fragments and Processors that are used in different parts of the Mass framework. It is divided into the following modules:
 
 > 6.2.1 [`MassCommon`](#mass-pm-gp-mc)  
@@ -1142,47 +1152,74 @@ The `MassGameplay` plugin compiles a number of useful Fragments and Processors t
 > 6.2.7 [`MassReplication`](#mass-pm-gp-mre)  
 > 6.2.8 [`MassSignals`](#mass-pm-gp-msi)  
 > 6.2.9 [`MassSmartObjects`](#mass-pm-gp-mso)  
+> 6.2.10 [`MassEQS`](#mass-pm-gp-eqs)  MassEQS
 
 <!-- FIXME: Since there are some modules more interesting than others we will format them in a subsection manner, so we can extend the interesting one easier. -->
 <a name="mass-pm-gp-mc"></a>
+
 #### 6.2.1 `MassCommon`
-Basic fragments like `FTransformFragment`.
+
+包含基础的fragments，例如 `FTransformFragment`，`FAgentRadiusFragment`
 
 <a name="mass-pm-gp-mm"></a>
+
 #### 6.2.2 `MassMovement`
+
 Features an important `UMassApplyMovementProcessor` processor that moves entities based on their velocity and force.
 
 <a name="mass-pm-gp-mr"></a>
+
 #### 6.2.3 `MassRepresentation`
+
 Processors and fragments for rendering entities in the world. They generally use an ISMC to do so, but can also swap entities out with full Unreal actors at user specified distances.
 
 <a name="mass-pm-gp-ms"></a>
+
 #### 6.2.4 `MassSpawner`
+
 A highly configurable actor type that can spawn specific entities where you want. There are two ways of choosing locations built in, one that uses an Environmental Query System asset and one that uses a ZoneGraph tag-based query. The Mass Spawner actor appears to be intended for things that spawn all at once initially like NPCs,trees etc, rather than dynamically spawned things like projectiles, for example.
 
 <a name="mass-pm-gp-ma"></a>
+
 #### 6.2.5 `MassActors`
+
 A bridge between the general UE5 actor framework and Mass. A type of fragment that turns entities into "Agents" that can exchange data in either direction (or both ways).
 
 <a name="mass-pm-gp-ml"></a>
+
 #### 6.2.6 `MassLOD`
+
 LOD Processors that can manage different kinds of levels of detail, from rendering to ticking at different rates based on fragment settings. They are used in visualization and replication currently as well.
 
 <a name="mass-pm-gp-mre"></a>
+
 #### 6.2.7 `MassReplication`
+
 Replication support for Mass! Other modules override `UMassReplicatorBase` to replicate stuff. Entities are given a separate Network ID that gets passed over the network, rather than the EntityHandle. An example showing this is planned for much later.
 
 <a name="mass-pm-gp-msi"></a>
+
 #### 6.2.8 `MassSignals`
+
 A system that lets entities send named signals to each other.
 
 <a name="mass-pm-gp-mso"></a>
+
 #### 6.2.9 [`MassSmartObjects`](https://docs.unrealengine.com/5.0/en-US/smart-objects-in-unreal-engine/)
+
 Lets entities "claim" SmartObjects to interact with them.
+
+<a name="mass-pm-gp-eqs"></a>
+
+#### 6.2.10 [`MassEQS`]
+
+5.5新增。
 
 <!-- This section explicitly for AI specific modules-->
 <a name="mass-pm-ai"></a>
+
 ### 6.3 MassAI
+
 `MassAI` is a plugin that provides AI features for Mass within a series of modules:
 
 > 6.3.1 [`ZoneGraph`](#mass-pm-ai-zg)  
@@ -1196,7 +1233,9 @@ This section, like the rest of the document, is still work in progress.
 <!-- FIXMEFUNK: I think we should cover a brief overview at the minimum. most of Mass is attached to the AI stuff so we kind of have to at least mention all of it. The Zonegraph cones are a good short example. We should suggest to check out the CitySample at least. -->
 
 <a name="mass-pm-ai-zg"></a>
+
 #### 6.3.1 `ZoneGraph`
+
 <!-- FIXME: Add screenshots and examples. -->
 In-level splines and shapes that use config defined lanes to direct zonegraph pathing things around! Think sidewalks, roads etc. This is the main way Mass Crowd members get around.
 
