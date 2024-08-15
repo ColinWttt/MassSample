@@ -1268,6 +1268,39 @@ processors和fragments用于在世界中渲染entities。它们通常使用 ISMC
 
 一个连接通用 UE5 Actor 框架和 Mass 的桥梁。这是一种将entities转化为“Agent”的fragment类型，可以双向交换数据。
 
+- IMassActorPoolableInterface
+  可以在蓝图使用的接口，包含标注了UFUNCTION(BlueprintNativeEvent, BlueprintCallable)的
+  CanBePooled、PrepareForPooling、PrepareForGame
+
+##### 6.2.5.2 MassActorSubsystem
+
+管理Actors和Mass之间交流的子系统。
+不支持蓝图调用。
+
+##### 6.2.5.3 MassActorFragment
+
+继承`FObjectWrapperFragment`，
+用于保存一个Mass entity的 actor指针的Fragment（如果存在的话），包含一个Actor弱指针成员变量，该变量VisibleAnywhere，可以在Mass的 gameplay debugger查看fragment细节时查看。
+
+#### 6.2.5.4 MassAgentComponent
+
+两个主要的用法：
+
+1. 如果放置在 AActor 蓝图上，它允许用户指定额外的fragment，这些fragment将为基于此给定蓝图生成的entity创建。
+2. 如果放置在于世界中的 Actor 上，它将与 MassSimulation 通信，MassSimulation 将创建一个entity来代表给定的 Actor 。用例 1）也适用于这种情况。该组件默认未注册，需要通过“Enable”调用手动启用。
+
+#### 6.2.5.5 MassAgentTraits
+
+UMassAgentSyncTrait，标注了UCLASS(Abstract)，继承自UMassEntityTraitBase
+
+UMassAgentCapsuleCollisionSyncTrait，标注了BlueprintType，继承自UMassAgentSyncTrait
+ The trait initializes the entity with actor capsule component's radius. In addition, if bSyncTransform is true ，the trait keeps actor capsule component's and entity's transforms in sync.
+
+UMassAgentMovementSyncTrait
+UMassAgentOrientationSyncTrait
+UMassAgentFeetLocationSyncTrait
+
+
 <a name="mass-pm-gp-ml"></a>
 
 #### 6.2.6 `MassLOD`
