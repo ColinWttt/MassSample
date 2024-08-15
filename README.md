@@ -1205,7 +1205,7 @@ This Section overviews the three main Mass plugins and their different modules:
 
 ### 6.1 [`MassEntity`](https://docs.unrealengine.com/5.0/en-US/overview-of-mass-entity-in-unreal-engine/)
 
-`MassEntity`插件在5.5废弃，代码移动到引擎中（`Engine/Source/Runtime/MassEntity`）。MassEntity 管理Entity的创建和存储。
+`MassEntity`插件在UE5.5废弃，全部移动到引擎中（`Engine/Source/Runtime/MassEntity`）。MassEntity 管理Entity的创建和存储。
 
 <a name="mass-pm-gp"></a>
 
@@ -1235,25 +1235,38 @@ The `MassGameplay` plugin compiles a number of useful Fragments and Processors t
 
 #### 6.2.2 `MassMovement`
 
-Features an important `UMassApplyMovementProcessor` processor that moves entities based on their velocity and force.
+具有一个重要的 `UMassApplyMovementProcessor` processor，它根据entities的速度和作用力使他们移动。
+该processor对Off-LOD的entities不生效。
+
+此外，包含多个移动相关的Fragement:
+
+- `FMassVelocityFragment`
+- `FMassForceFragment`
+- `FMassMovementParameters`（继承`FMassConstSharedFragment`）
+  蓝图可编辑属性MaxSpeed、MaxAcceleration、DefaultDesiredSpeed、DefaultDesiredSpeedVariance、HeightSmoothingTime、MovementStyles
+
+一个Trait，`UMassMovementTrait`:
+
+- 包含蓝图可编辑的成员变量FMassMovementParameters
+- 重写的BuildTemplate包含了MassVelocityFragment、FMassForceFragment、MovementFragment
 
 <a name="mass-pm-gp-mr"></a>
 
 #### 6.2.3 `MassRepresentation`
 
-Processors and fragments for rendering entities in the world. They generally use an ISMC to do so, but can also swap entities out with full Unreal actors at user specified distances.
+processors和fragments用于在世界中渲染entities。它们通常使用 ISMC 来实现，但也可以在用户指定的距离内将实体替换为完整的 Unreal Actor。
 
 <a name="mass-pm-gp-ms"></a>
 
 #### 6.2.4 `MassSpawner`
 
-A highly configurable actor type that can spawn specific entities where you want. There are two ways of choosing locations built in, one that uses an Environmental Query System asset and one that uses a ZoneGraph tag-based query. The Mass Spawner actor appears to be intended for things that spawn all at once initially like NPCs,trees etc, rather than dynamically spawned things like projectiles, for example.
+一种高度可配置的 Actor 类型，可以在您想要的位置生成特定entities。有两种内置的选择位置的方式：一种使用环境查询系统（Environmental Query System）资产，另一种使用 ZoneGraph 基于标签的查询。Mass Spawner Actor 似乎是用于最初一次性生成的事物，例如 NPC、树等，而不是动态生成的事物，例如投射物（projectiles）。
 
 <a name="mass-pm-gp-ma"></a>
 
 #### 6.2.5 `MassActors`
 
-A bridge between the general UE5 actor framework and Mass. A type of fragment that turns entities into "Agents" that can exchange data in either direction (or both ways).
+一个连接通用 UE5 Actor 框架和 Mass 的桥梁。这是一种将entities转化为“Agent”的fragment类型，可以双向交换数据。
 
 <a name="mass-pm-gp-ml"></a>
 
@@ -1265,7 +1278,7 @@ LOD Processors that can manage different kinds of levels of detail, from renderi
 
 #### 6.2.7 `MassReplication`
 
-Replication support for Mass! Other modules override `UMassReplicatorBase` to replicate stuff. Entities are given a separate Network ID that gets passed over the network, rather than the EntityHandle. An example showing this is planned for much later.
+Mass 的网络复制支持。其他模块会重写 `UMassReplicatorBase`  来复制内容。Entities被赋予一个独立的网络 ID，该 ID 会在网络上传输，而不是 EntityHandle。一个展示这一点的示例计划在更晚的阶段进行。
 
 <a name="mass-pm-gp-msi"></a>
 
@@ -1291,6 +1304,7 @@ Lets entities "claim" SmartObjects to interact with them.
 ### 6.3 MassAI
 
 `MassAI` is a plugin that provides AI features for Mass within a series of modules:
+
 位置：`Engine/Plugins/AI/MassAI`
 
 > 6.3.1 [`ZoneGraph`](#mass-pm-ai-zg)  
