@@ -429,11 +429,9 @@ void UMyProcessor::ConfigureQueries()
 
 要在processor上执行查询，我们必须调用`RegisterWithProcessor`并将processor作为参数传递来注册它们。`FMassEntityQuery` 还提供了一个调用`RegisterWithProcessor`的有参数的构造函数，该函数在多个Mass模块中的一些processors中使用（例如：`UDebugVisLocationProcessor`）。
 
-`ProcessorRequirements` is a special query part of `UMassProcessor` that holds all the `UWorldSubsystem`s that get accessed in the `Execute` function outside the queries scope. In the example above, `UMassDebuggerSubsystem` gets accessed within `MyQuery`'s scope (`MyQuery.AddSubsystemRequirement`) and in the `Execution` function scope (`ProcessorRequirements.AddSubsystemRequirement`).
-
 `ProcessorRequirements` 是 `UMassProcessor` 的一个特殊查询，它包含了在 `Execute` 函数中超出查询范围访问的所有 `UWorldSubsystem`。在上述示例中，`UMassDebuggerSubsystem` 在 `MyQuery` 的范围内（`MyQuery.AddSubsystemRequirement`）和 `Execution` 函数范围内（`ProcessorRequirements.AddSubsystemRequirement`）被访问。
 
-通过使用lambda调用 `ForEachEntityChunk`  成员函数，并传递相关的 `FMassEntityManager`  和 `FMassExecutionContext`，查询被执行。
+通过使用lambda调用 `ForEachEntityChunk`成员函数，并传递相关的 `FMassEntityManager`  和 `FMassExecutionContext`，查询被执行。
 
 Processors在其 `Execute` 函数内执行查询：
 
@@ -533,16 +531,16 @@ MyQuery.ForEachEntityChunk(EntityManager, Context, [this, World = EntityManager.
 
 Queries can define presence requirements for Fragments and Tags:
 
-| `EMassFragmentPresence` | Description                                                                       |
+| `EMassFragmentPresence` | 描述                                                                       |
 | ----------- |-----------------------------------------------------------------------------------|
-| All | All of the required fragments/tags must be present. Default presence requirement. |
+| All | 所有需求的fragments/tags都必须存在。默认的presence requirement. |
 | Any | At least one of the fragments/tags marked any must be present.                    |
 | None | None of the required fragments/tags can be present.                               |
 | Optional | If fragment/tag is present we'll use it, but it does not need to be present.      |
 
 ##### 4.7.2.1 Presence requirements in Tags
 
-To add presence rules to Tags, use `AddTagRequirement`.
+为Tags添加存在规则, 使用 `AddTagRequirement`.
 
 ```c++
 void UMyProcessor::ConfigureQueries()
@@ -556,7 +554,7 @@ void UMyProcessor::ConfigureQueries()
 }
 ```
 
-`ForEachChunk`s can use `DoesArchetypeHaveTag` to determine if the current archetype contains the the Tag:
+`ForEachChunk`s 可以使用 `DoesArchetypeHaveTag` 来判断当前archetype是否含有特定Tag:
 
 ```c++
 MyQuery.ForEachEntityChunk(EntityManager, Context, [](FMassExecutionContext& Context)
@@ -668,7 +666,7 @@ In order to Defer Entity mutations we require to obtain the handle (`FMassEntity
 
 The following Subsections will employ the keywords `EntityHandle` and `EntityHandleArray` when handling singular or plural operations, respectively.
 
-##### 4.7.3.1 Basic mutation operations
+##### 4.7.3.1 修改entity（基础）
 
 The following Listings define the native mutations that you can defer:
 
@@ -698,7 +696,7 @@ Context.Defer().DestroyEntities(EntityHandleArray);
 
 These are all convenient wrappers for the internal template based deferred commands.
 
-##### 4.7.3.2 Advanced mutation operations
+##### 4.7.3.2 修改entity（进阶）
 
 There is a set of `FCommandBufferEntryBase` commands that can be used to defer some more useful entity mutations. The following subsections provide an overview.
 
@@ -736,7 +734,7 @@ EntityManager->Defer().PushCommand<FMassCommandBuildEntity>(ReserverdEntity, MyT
 
 ###### 4.7.3.2.3 `FMassCommandBuildEntityWithSharedFragments`
 
-Similar to `FMassCommandBuildEntity` but it takes a `FMassArchetypeSharedFragmentValues` struct to set shared fragment values on the entity as well. This requires some extra work to find or create the shared fragment.
+类似`FMassCommandBuildEntity` but it takes a `FMassArchetypeSharedFragmentValues` struct to set shared fragment values on the entity as well. This requires some extra work to find or create the shared fragment.
 
 ```c++
 FMassArchetypeSharedFragmentValues SharedFragmentValues;
@@ -813,7 +811,7 @@ Here they are and what they do in order when commands are flushed:
 
 <a name="mass-traits"></a>
 
-### 4.8 Traits
+### 4.8 Traits（特征）
 
 Traits are C++ defined objects that declare a set of Fragments, Tags and data for authoring new entities in a data-driven way.
 
@@ -832,7 +830,7 @@ In addition, it is possible to inherit Fragments from another `UMassEntityConfig
 <!-- REVIEWMEFUNK kind of hard to talk about it too much here with the other section existing -->
 Traits are often used to add Shared Fragments in the form of settings. For example, our visualization traits save memory by sharing which mesh they are displaying, parameters etc. Configs with the same settings will share the same Shared Fragment.
 
-#### 4.8.1 Creating a trait
+#### 4.8.1 创建一个trait
 
 Traits are created by inheriting `UMassEntityTraitBase` and overriding `BuildTemplate`. Here is a very basic example:
 
@@ -860,7 +858,7 @@ public:
 };
 ```
 
-**Note:** We recommend looking at the many existing traits in this sample and the mass modules for a better overview. For the most part, they are fairly simple UObjects that occasionally have extra code to make sure the fragments are all valid and set correctly.
+**注意:** 我们建议查看此示例中的许多现有traits和 Mass模块，以便更好地了解。它们大多是相当简单的 UObject，偶尔会有额外的代码来确保所有的fragments都有效并设置正确。
 
  <!--REVIEWMEFUNK moved it up to this section "-->
 ##### Shared Fragments
@@ -907,14 +905,14 @@ void UMSNiagaraRepresentationTrait::ValidateTemplate(FMassEntityTemplateBuildCon
 
 The `UMassObserverProcessor` is a type of processor that operates on entities that have just performed a `EMassObservedOperation` over the Fragment/Tag type observed:
 
-| `EMassObservedOperation` | Description |
+| `EMassObservedOperation` | 描述 |
 | ----------- | ----------- |
 | Add | The observed Fragment/Tag was added to an entity. |
 | Remove | The observed Fragment/Tag was removed from an entity. |
 
 Observers do not run every frame, but every time a batch of entities is changed in a way that fulfills the observer requirements.
 
-For example, this observer changes the color to the entities that just had an `FColorFragment` added:
+For example, this observer changes the color to the entities that just had an `FSampleColorFragment` added:
 
 ```c++
 UMSObserverOnAdd::UMSObserverOnAdd()
@@ -1293,6 +1291,7 @@ Lets entities "claim" SmartObjects to interact with them.
 ### 6.3 MassAI
 
 `MassAI` is a plugin that provides AI features for Mass within a series of modules:
+位置：`Engine/Plugins/AI/MassAI`
 
 > 6.3.1 [`ZoneGraph`](#mass-pm-ai-zg)  
 > 6.3.2 [`StateTree`](#mass-pm-ai-st)  
