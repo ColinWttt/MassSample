@@ -34,16 +34,18 @@ After installing the requirements from above, follow these steps:
 1. Right-Click where you wish to hold your project, then press `Git Bash Here`.
 
 2. Within the terminal, clone the project:
+
  ```bash
  git clone https://github.com/Megafunk/MassSample.git
  ```
 
-3. Pull LFS:
+1. Pull LFS:
+
  ```bash
  git lfs pull
  ```
 
-4. Once LFS finishes, close the terminal.
+1. Once LFS finishes, close the terminal.
 
 <!--- Introduce here table of contents -->
 <a name="tocs"></a>
@@ -66,7 +68,7 @@ After installing the requirements from above, follow these steps:
 > 4.7 [Queries](#mass-queries)  
 > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.7.1 [Access requirements](#mass-queries-ar)  
 > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.7.2 [Presence requirements](#mass-queries-pr)  
-> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.7.3 [Iterating Queries](#mass-queries-iq)  
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.7.3 [Iterating Queries](#mass-queries-iq)
 > &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.7.3 [Mutating entities with Defer()](#mass-queries-mq)  
 > 4.8 [Traits](#mass-traits)  
 > 4.9 [Observers](#mass-o)  
@@ -364,7 +366,7 @@ The chunk size (`UE::Mass::ChunkSize`) has been conveniently set based on next-g
 
 Processors combine multiple user-defined [queries](#mass-queries) with functions that compute entities.
 
-Unreal classes deriving from UMassProcessor are automatically registered with Mass and added to the `EMassProcessingPhase::PrePhsysics` processing phase by default. Each `EMassProcessingPhase` relates to an `ETickingGroup`, meaning that, by default, processors tick every frame in their given processing phase.
+Unreal classes deriving from `UMassProcessor` are automatically registered with Mass and added to the `EMassProcessingPhase::PrePhsysics` processing phase by default. Each `EMassProcessingPhase` relates to an `ETickingGroup`, meaning that, by default, processors tick every frame in their given processing phase.
 They can also be created and registered with the `UMassSimulationSubsystem` but the common case is to create a new type.
 Users can configure to which processing phase their processor belongs by modifying the `ProcessingPhase` variable included in `UMassProcessor`:
 
@@ -401,17 +403,17 @@ On initialization, Mass creates a dependency graph of processors using their exe
 
 The `ExecutionFlags` variable indicates whether this processor should be executed on `Standalone`, `Server` or `Client`.
 
-By default [all processors are multithreaded](#mass-mt), however, they can also be configured to run in a single-thread if necessary by setting `bRequiresGameThreadExecution` to `true`.
+默认情况下，[所有 processors 都是多线程的](#mass-mt), however, they can also be configured to run in a single-thread if necessary by setting `bRequiresGameThreadExecution` to `true`.
 
 **Note:** Mass ships with a series of processors that are designed to be inherited and extended with custom logic. ie: The visualization and LOD processors.
 
 <a name="mass-queries"></a>
 
-### 4.7 Queries
+### 4.7 Queries（查询）
 
-Queries (`FMassEntityQuery`) filter and iterate entities given a series of rules based on Fragment and Tag presence.
+Queries (`FMassEntityQuery`) 通过基于Fragment和Tag的一系列规则来过滤和遍历（iterate）实体。
 
-Processors can define multiple `FMassEntityQuery`s and should override the `ConfigureQueries` to add rules to the different queries defined in the processor's header:
+Processors可以定义多个`FMassEntityQuery`，并应重写`ConfigureQueries`，为Processors的头文件中不同的查询来添加规则：
 
 ```c++
 void UMyProcessor::ConfigureQueries()
@@ -425,21 +427,23 @@ void UMyProcessor::ConfigureQueries()
 }
 ```
 
-To execute queries on a processor, we must register them by calling `RegisterWithProcessor` passing the processor as a parameter. `FMassEntityQuery` also offers a parameter constructor that calls `RegisterWithProcessor`, which is employed in some processors from various Mass modules (ie: `UDebugVisLocationProcessor`).
+要在processor上执行查询，我们必须调用`RegisterWithProcessor`并将processor作为参数传递来注册它们。`FMassEntityQuery` 还提供了一个调用`RegisterWithProcessor`的有参数的构造函数，该函数在多个Mass模块中的一些processors中使用（例如：`UDebugVisLocationProcessor`）。
 
 `ProcessorRequirements` is a special query part of `UMassProcessor` that holds all the `UWorldSubsystem`s that get accessed in the `Execute` function outside the queries scope. In the example above, `UMassDebuggerSubsystem` gets accessed within `MyQuery`'s scope (`MyQuery.AddSubsystemRequirement`) and in the `Execution` function scope (`ProcessorRequirements.AddSubsystemRequirement`).
 
-Queries are executed by calling the `ForEachEntityChunk` member function with a lambda, passing the related `FMassEntityManager` and `FMassExecutionContext`.
+`ProcessorRequirements` 是 `UMassProcessor` 的一个特殊查询，它包含了在 `Execute` 函数中超出查询范围访问的所有 `UWorldSubsystem`。在上述示例中，`UMassDebuggerSubsystem` 在 `MyQuery` 的范围内（`MyQuery.AddSubsystemRequirement`）和 `Execution` 函数范围内（`ProcessorRequirements.AddSubsystemRequirement`）被访问。
 
-Processors execute queries within their `Execute` function:
+通过使用lambda调用 `ForEachEntityChunk`  成员函数，并传递相关的 `FMassEntityManager`  和 `FMassExecutionContext`，查询被执行。
+
+Processors在其 `Execute` 函数内执行查询：
 
 ```c++
 void UMyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
- //Note that this is a lambda! If you want extra data you may need to pass it in the [] operator
+ //注意这是一个lambda！如果您需要额外的数据，您可能需要在[]操作符中传递
  MyQuery.ForEachEntityChunk(EntityManager, Context, [](FMassExecutionContext& Context)
  {
-  //Loop over every entity in the current chunk and do stuff!
+  // 循环遍历当前chunk中的每个entity并执行操作！
   for (int32 EntityIndex = 0; EntityIndex < Context.GetNumEntities(); ++EntityIndex)
   {
    // ...
@@ -448,9 +452,9 @@ void UMyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionCont
 }
 ```
 
-Be aware that the index we employ to iterate entities, in this case `EntityIndex`, doesn't identify uniquely your entities along time, since chunks' disposition may change and an entity that has an index this frame, may be in a different chunk with a different index in the next frame.
+请注意，我们用于遍历entities的索引（在本例中为 `EntityIndex`）并不能唯一地标识您的entities，因为chunks的布局（disposition）可能会改变，在这一帧具有此索引的entity，可能在下一帧中位于不同的chunk中，并具有不同的索引。
 
-**Note:** Queries can also be created and iterated outside processors.
+**注意:** Queries也可以在processors之外创建和迭代。
 
 <a name="mass-queries-ar"></a>
 
@@ -820,7 +824,7 @@ In addition, it is possible to inherit Fragments from another `UMassEntityConfig
 
 ![MassEntityConfigAsset](Images/massentityconfigasset.jpg)
 
-Between the many built-in traits offered by Mass, we can find the `Assorted Fragments` trait, which holds an array of `FInstancedStruct` that enables adding Fragments to this trait from the editor without the need of creating a new C++ Trait.
+在Mass提供的众多内置traits中，我们可以找到 `Assorted Fragments` trait。它包含一个 `FInstancedStruct` 数组，使得可以直接在编辑器中为该trait添加Fragments，而无需创建新的C++ Trait。
 
 ![AssortedFragments](Images/assortedfragments.jpg)
 
